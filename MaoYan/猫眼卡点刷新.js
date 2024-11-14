@@ -58,50 +58,34 @@ function main() {
 
 // 处理支付流程，包括检测弹框和点击支付按钮
 function processPayment() {
-  let waitTime = 200; // 初始等待时间 200 毫秒
   while (true) {
     // 检测并处理弹框
     if (textContains("前方拥堵").exists() && text("刷新").exists()) {
       console.log("检测到‘前方拥堵’弹框，点击‘刷新’按钮");
-      let refreshButton = text("刷新").findOne(1000); // 等待刷新按钮出现
-      if (refreshButton) {
-        refreshButton.click();
-        console.log("已点击‘刷新’按钮");
-        waitTime = 200; // 点击后恢复快速检测
-        sleep(200);
-        continue; // 继续支付流程
-      }
+      text("刷新").findOne().click();
+      sleep(500); // 避免过快点击
+      continue; // 继续支付流程
     }
 
     // 检测支付按钮
     if (textContains("立即支付").exists() || className("android.widget.Button").text("支付").exists()) {
       console.log("检测到支付按钮，点击支付");
-      let payButton = className("android.widget.Button").text("支付").findOne(1000); // 等待支付按钮出现
-      if (payButton) {
-        payButton.click();
-        console.log("已点击支付按钮");
-        waitTime = 200; // 点击后恢复快速检测
-        sleep(200);
-        continue; // 继续支付流程
-      }
+      className("android.widget.Button").text("支付").findOne().click();
+      sleep(500); // 等待页面响应
+      continue; // 继续支付流程
     }
 
     // 检测确认按钮
     if (text("确认").exists()) {
       console.log("检测到确认按钮，点击确认");
-      let confirmButton = text("确认").findOne(1000); // 等待确认按钮出现
-      if (confirmButton) {
-        confirmButton.click();
-        console.log("已点击确认按钮");
-        waitTime = 200; // 点击后恢复快速检测
-        sleep(200);
-        continue; // 继续支付流程
-      }
+      text("确认").findOne().click();
+      sleep(500); // 避免重复点击
+      continue; // 继续支付流程
     }
 
-    // 如果没有检测到目标，逐步增加等待时间
-    console.log("未检测到目标控件，延长检测间隔：" + waitTime + " 毫秒");
-    sleep(waitTime);
-    waitTime = Math.min(waitTime + 100, 500); // 最大延长到 500 毫秒
+    // 如果都没有，尝试点击默认支付坐标
+    console.log("未检测到弹框或按钮，尝试点击默认支付坐标");
+    click(ConfirmX, ConfirmY);
+    sleep(500); // 等待页面刷新
   }
 }
